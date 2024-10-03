@@ -35,6 +35,10 @@ export async function compileBinary(
   // replace the {{appName}} placeholder with the appName the user has chosen
   goEntryTemplate = goEntryTemplate.replace('{{appName}}', appName);
 
+  //FIX prepare nodeFlags 
+  nodeFlags = nodeFlags.toString().replace('[', "").replace("]", "").split(',')
+
+
   goEntryTemplate = goEntryTemplate.replace(
     'nodeFlags := []string{}',
     `nodeFlags := []string{${nodeFlags.map(flag => `"${flag.replace(/^["']/, '').replace(/["']$/, '')}"`)}}`,
@@ -48,9 +52,8 @@ export async function compileBinary(
     env: { GOARCH: goTargetArch, GOOS: goTargetOs },
   });
 
-  const compilerPath = `${path.join(path.dirname(goEntryTmpPath), 'compiler')}${
-    goTargetOs === 'windows' ? '.exe' : ''
-  }`;
+  const compilerPath = `${path.join(path.dirname(goEntryTmpPath), 'compiler')}${goTargetOs === 'windows' ? '.exe' : ''
+    }`;
   const outFilePath = path.join(outDir, `${appName}-${target}${goTargetOs === 'windows' ? '.exe' : ''}`);
   await fs.move(compilerPath, outFilePath, {
     overwrite: true,
